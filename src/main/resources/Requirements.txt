@@ -1,0 +1,71 @@
+The company you work for, Intuition Inc, wants to keep their Organisation Chart up to date, so they can clearly
+determine each worker's role and responsibilities, including management chain up to the CEO.
+They have assigned to you the awesome task of writing a program to help them achieve this.
+
+What you need to do:
+
+- For every employee, store (at least) the following information:
+    - First name(s), last name(s), role, start date and employee number.
+        - Employee number must be unique within the company.
+    - The available roles are:
+        - CEO
+        - Vice President
+        - Director
+        - Manager
+        - Employee
+
+- Every active employee within the organisation has a manager, except the CEO.
+- There is only a single CEO.
+- Every active employee has a numeric value that determines their level in the company hierarchy
+  in relation to the CEO (who is at level 1)
+    - For instance, the CEO is at level 1, one of his direct reports is at level 2, the direct report of
+      the latter is at level 3 and
+
+Based on the information collected above and any other information you find pertinent,
+there are certain operations that need to be implemented:
+
+- Adding an employee to the Organisation.
+- Changing teams.
+    - An employee can move to another team within the organisation. When moving to a different team,
+      an employee starts reporting to a new manager, without transferring his past subordinates to the new team.
+      Instead, the most senior (based on start date) of his past subordinates should be promoted to manage
+      the employee’s former team.
+    - Example:
+        - Louis, who used to report to Sally, decides to move teams, and now he reports to Brandon.
+        - Mark, who was Louis’ most senior direct report, is promoted to manage all former subordinates of Louis,
+        and he also now reports to Sally.
+- Employee goes on holidays
+    - When an employee goes on holidays, all his subordinates start reporting to the employee's manager temporarily.
+    - Example:
+        - Pete, who reports to Laura, goes on holidays. Until he comes back, all his direct reports now report to Laura
+- Employee comes back from holidays
+    - When an employee comes back from holidays, all his subordinates come back to report to him,
+      unless they have moved teams.
+- Promotions
+    - When an employee is promoted, he effectively becomes a peer of his former manager.
+      Unfortunately, there is a single CEO for the company, so attempting a promotion of one of the CEO’s
+      subordinates should fail.
+- Print the list of candidates eligible for promotion to Vice President and/or Director
+    - An employee is ready to become a Director if he has at least 20 employees in his organisation
+      (people subordinate to him, and his subordinates), including at least 2 managers
+      (people that also have direct reports).
+    - An employee is ready to become a Vice President if he has more than 40 employees in his organisation
+      (people subordinate to him, and his subordinates), including at least 4 directors.
+    - If there are more than one candidates, they are prioritised by the time they’ve
+      worked in the organisation.
+
+- (Optional) Print the whole organisation tree, starting with the CEO, and then printing all
+  other employees one level at a time (i.e. print level 1, then level 2, then level 3, etc).
+- (Optional) Given an employee, print the path from the CEO to the employee.
+
+You can use any programming language you want. Please try to minimize the usage of third party libraries
+(with the exception of standard libraries like STL in C++ or Collections in Java, as well as any testing frameworks
+like JUnit or Spock) as the goal is to evaluate the code written by yourself.
+
+We are interested in seeing what data structures and algorithms you have chosen to implement in order to satisfy
+the given requirements. We will be assessing how you structure your code to facilitate extensibility, readability
+and testability, compliance with best OO practices and also how easy it is for others to understand and modify.
+We are also interested in seeing how efficient your solution is, so don't forget to comment on the complexity of
+the algorithms you implement.
+
+Please hand in your solution along with any notes, comments, and assumptions you have made while working on it.

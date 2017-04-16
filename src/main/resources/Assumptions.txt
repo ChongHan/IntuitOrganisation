@@ -1,0 +1,8 @@
+- Organisation needs one CEO upon creation
+- Direct reports of CEO/Director/Manager/Vice President can be of any role (excluding CEO)
+- CEO doesn't change teams nor step down
+
+- Employee have no subordinates
+- When an employee gets a a subordinate assigned, it automatically get promoted to manager.
+
+
