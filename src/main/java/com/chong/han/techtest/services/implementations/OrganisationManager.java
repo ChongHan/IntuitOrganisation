@@ -5,6 +5,8 @@ import com.chong.han.techtest.models.implementations.Employee;
 import com.chong.han.techtest.models.implementations.Role;
 import com.chong.han.techtest.services.interfaces.Organisation;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Created by CHONG HAN on 15/04/2017.
@@ -49,48 +51,110 @@ public class OrganisationManager implements Organisation {
       throw new InvalidOperationException();
     }
 
-    employee.getSuperior().getReports().removeIf(e -> e.getEmployeeNumber() == employeeNumber);
+    employee.getSuperior().removeDirectReport(employeeNumber); // remove reference from exManager
 
     if (employee.getReports().size() > 0) {
       promoteSeniorSub(employee, employee.getSuperior(), employee.getSeniorReport());
-    }
 
-    employee.setReports(new ArrayList<Employee>());
+      // seniorSub now takeover the old role and report to previous boss
+      employee.getSuperior().addDirectReport(employee.getSeniorReport());
+      employee.getSeniorReport().setSuperior(employee.getSuperior());
+      employee.setReports(new CopyOnWriteArrayList<>());
+    }
     this.addEmployee(employee, newManagerNumber);
 
-    return null;
+    return this;
   }
 
   private void promoteSeniorSub(Employee previousManager, Employee newManager, Employee seniorSub) {
     if (seniorSub.getReports().size() == 0) {
-      seniorSub.setReports(previousManager.getReports());
+      // add exManager's reports
+      for (Employee report : previousManager.getReports()) {
+        seniorSub.addDirectReport(report);
+      }
+      // remove self from the report list
       seniorSub.getReports().removeIf(e -> e.getEmployeeNumber() == seniorSub.getEmployeeNumber());
       seniorSub.setSuperior(newManager);
     } else {
       promoteSeniorSub(seniorSub, seniorSub, seniorSub.getSeniorReport());
+      // add exManagers reports
       for (Employee report : previousManager.getReports()) {
-        seniorSub.addDirectReport(report);
-        seniorSub.getReports()
-            .removeIf(e -> e.getEmployeeNumber() == seniorSub.getEmployeeNumber());
+        if (report.getEmployeeNumber() != seniorSub.getEmployeeNumber()) {
+          seniorSub.addDirectReport(report);
+          // sub of previous Manager now reports to new seniorSub
+          report.getSuperior().removeDirectReport(report.getEmployeeNumber());
+          report.setSuperior(seniorSub);
+        }
       }
       seniorSub.setSuperior(newManager);
     }
+  }
 
+  public Employee getCurrentSuperior(long employeeNumber) {
+    Employee employee = ceo.findEmployee(employeeNumber);
+
+    if (employee == null) {
+      throw new InvalidOperationException();
+    }
+
+    if (employee.getSuperior().isHoliday()) {
+      return getCurrentSuperior(employee.getSuperior().getEmployeeNumber());
+    } else {
+      return employee.getSuperior();
+    }
+  }
+
+  public Collection<Employee> getCurrentReport(long employeeNumber) {
+    Employee employee = ceo.findEmployee(employeeNumber);
+
+    if (employee == null) {
+      throw new InvalidOperationException();
+    }
+
+    ArrayList<Employee> reports = new ArrayList<>();
+
+    for (Employee report : employee.getReports()) {
+      if (!report.isHoliday()) {
+        reports.add(report);
+      } else {
+        reports.addAll(this.getCurrentReport(report.getEmployeeNumber()));
+      }
+    }
+    return reports;
   }
 
   @Override
   public Organisation goOnHoliday(long employee) {
-    return null;
+    Employee holidayEmployee = ceo.findEmployee(employee);
+    if (holidayEmployee == null | holidayEmployee.getRole() == Role.CEO) {
+      throw new InvalidOperationException();
+    }
+
+    holidayEmployee.setHoliday(true);
+
+    return this;
   }
 
   @Override
   public Organisation comeBackFromHoliday(long employee) {
-    return null;
+    Employee holidayEmployee = ceo.findEmployee(employee);
+    if (holidayEmployee == null | holidayEmployee.getRole() == Role.CEO) {
+      throw new InvalidOperationException();
+    }
+
+    holidayEmployee.setHoliday(false);
+    return this;
   }
 
   @Override
   public Organisation promoteEmployee(long employee) {
-    return null;
+    Employee promoteEmployee = ceo.findEmployee(employee);
+    if (promoteEmployee == null | promoteEmployee.getLevel() == 2) {
+      throw new InvalidOperationException();
+    }
+
+    this.changeTeam(employee, promoteEmployee.getSuperior().getSuperior().getEmployeeNumber());
+    return this;
   }
 
   @Override
