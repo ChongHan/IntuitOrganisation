@@ -16,11 +16,11 @@ import org.junit.Test;
  */
 public class OrganisationManagerTest {
 
-  Employee ceo,
-      manager, manager2, manager3,
-      employee, employee2,
-      director, director2,
-      vicePresident, vicePresident2;
+  Employee ceo;
+  Employee manager, manager2, manager3;
+  Employee employee, employee2;
+  Employee director, director2;
+  Employee vicePresident, vicePresident2;
   OrganisationManager orgManager;
 
   @Before
@@ -51,7 +51,7 @@ public class OrganisationManagerTest {
   }
 
   @Test
-  public void organisationCanAddnewEmployee() {
+  public void organisationCanAddNewEmployee() {
     assertEquals("initially ceo has no subordinate", 0, ceo.getReports().size());
     orgManager.addEmployee(manager, 0);
     assertEquals("after adding employee ceo has 1 subordinate", 1, ceo.getReports().size());
@@ -100,6 +100,7 @@ public class OrganisationManagerTest {
    *                 - e5 - e6
    *                      - e7 - e8
    *                           - e9 - e10
+   *                                - e11
    * after:  e1 - e2 - e5
    *            - e3 - e4
    *                 - e7 - e6
@@ -216,10 +217,10 @@ public class OrganisationManagerTest {
     assertEquals(3, e1.getReports().size());
     assertEquals(2, m3.getReports().size());
     assertEquals("e1 has reports 2, 3, 5", e1.getReports(),
-        new CopyOnWriteArrayList<Employee>(Arrays.asList(m2, m3, m5)));
+        new CopyOnWriteArrayList<>(Arrays.asList(m2, m3, m5)));
     assertEquals("m5 and m2 report to the same manager", m5.getSuperior(), m2.getSuperior());
     assertEquals("m3 has reports 4, 7", m3.getReports(),
-        new CopyOnWriteArrayList<Employee>(Arrays.asList(m4, m7)));
+        new CopyOnWriteArrayList<>(Arrays.asList(m4, m7)));
   }
 
   @Test
@@ -256,7 +257,114 @@ public class OrganisationManagerTest {
     assertEquals("e1 has 9 subs", 9, orgManager.countAllSub(e1.getEmployeeNumber()));
     assertEquals("m9 has 1 sub", 1, orgManager.countAllSub(m9.getEmployeeNumber()));
     assertEquals("m7 has 3 subs", 3, orgManager.countAllSub(m7.getEmployeeNumber()));
+  }
 
-    System.out.println(orgManager.countAllSubRole(2, Role.MANAGER));
+  @Test
+  /**
+   * structure: e1 - e2
+   *               - e3 - e4
+   *                     - e5 - e6
+   *                          - e7 - e8
+   *                               - e9 - e10
+   */
+  public void canGetNumberOfSubordinatesWhoHaveRole() {
+    Employee e1 = new Employee(1L, "first", "last", Role.CEO, LocalDate.now());
+    Employee m2 = new Employee(2L, "first", "last", Role.MANAGER, LocalDate.now().minusDays(1));
+    Employee m3 = new Employee(3L, "first", "last", Role.MANAGER, LocalDate.now().minusDays(2));
+    Employee m4 = new Employee(4L, "first", "last", Role.MANAGER, LocalDate.now().minusDays(3));
+    Employee m5 = new Employee(5L, "first", "last", Role.MANAGER, LocalDate.now().minusDays(4));
+    Employee m6 = new Employee(6L, "first", "last", Role.MANAGER, LocalDate.now().minusDays(5));
+    Employee m7 = new Employee(7L, "first", "last", Role.MANAGER, LocalDate.now().minusDays(6));
+    Employee m8 = new Employee(8L, "first", "last", Role.MANAGER, LocalDate.now().minusDays(7));
+    Employee m9 = new Employee(9L, "first", "last", Role.MANAGER, LocalDate.now().minusDays(8));
+    Employee m10 = new Employee(10L, "first", "last", Role.MANAGER, LocalDate.now().minusDays(9));
+
+    orgManager = new OrganisationManager(e1);
+    orgManager.addEmployee(m2, 1)
+        .addEmployee(m3, 1)
+        .addEmployee(m4, 3)
+        .addEmployee(m5, 3)
+        .addEmployee(m6, 5)
+        .addEmployee(m7, 5)
+        .addEmployee(m8, 7)
+        .addEmployee(m9, 7)
+        .addEmployee(m10, 9);
+
+    assertEquals(
+        "10 is a Manager and a sub of 9, but 10 doesnt have any direct reports, therefore 9 has no manager sub",
+        0, orgManager.countAllSubRole(9, Role.MANAGER));
+    assertEquals(4, orgManager.countAllSubRole(1, Role.MANAGER));
+    assertEquals(0, orgManager.countAllSubRole(6, Role.MANAGER));
+    assertEquals(3, orgManager.countAllSubRole(3, Role.MANAGER));
+  }
+
+  @Test
+  /**
+   * structure: e1 - e2
+   *               - e3 - e4
+   *                     - e5 - e6
+   *                          - e7 - e8
+   *                               - e9 - e10
+   *                                    - e11 - e12
+   *                                          - e13 - e14
+   *                                                - e15 - e16
+   *                                                      - e17 - e18
+   *                                                            - e19 - e20
+   *                                                                  - e21 - e22
+   *                                                                        - e23
+   */
+  public void canGetPromotionWaitingList() {
+    Employee e1 = new Employee(1L, "first", "last", Role.CEO, LocalDate.now());
+    Employee m2 = new Employee(2L, "first", "last", Role.MANAGER, LocalDate.now().minusDays(1));
+    Employee m3 = new Employee(3L, "first", "last", Role.MANAGER, LocalDate.now().minusDays(2));
+    Employee m4 = new Employee(4L, "first", "last", Role.MANAGER, LocalDate.now().minusDays(3));
+    Employee m5 = new Employee(5L, "first", "last", Role.MANAGER, LocalDate.now().minusDays(4));
+    Employee m6 = new Employee(6L, "first", "last", Role.MANAGER, LocalDate.now().minusDays(5));
+    Employee m7 = new Employee(7L, "first", "last", Role.MANAGER, LocalDate.now().minusDays(6));
+    Employee m8 = new Employee(8L, "first", "last", Role.MANAGER, LocalDate.now().minusDays(7));
+    Employee m9 = new Employee(9L, "first", "last", Role.MANAGER, LocalDate.now().minusDays(8));
+    Employee m10 = new Employee(10L, "first", "last", Role.MANAGER, LocalDate.now().minusDays(9));
+    Employee m11 = new Employee(11L, "first", "last", Role.MANAGER, LocalDate.now().minusDays(10));
+    Employee m12 = new Employee(12L, "first", "last", Role.MANAGER, LocalDate.now().minusDays(11));
+    Employee m13 = new Employee(13L, "first", "last", Role.MANAGER, LocalDate.now().minusDays(12));
+    Employee m14 = new Employee(14L, "first", "last", Role.DIRECTOR, LocalDate.now().minusDays(13));
+    Employee m15 = new Employee(15L, "first", "last", Role.DIRECTOR, LocalDate.now().minusDays(14));
+    Employee m16 = new Employee(16L, "first", "last", Role.DIRECTOR, LocalDate.now().minusDays(15));
+    Employee m17 = new Employee(17L, "first", "last", Role.DIRECTOR, LocalDate.now().minusDays(16));
+    Employee m18 = new Employee(18L, "first", "last", Role.MANAGER, LocalDate.now().minusDays(17));
+    Employee m19 = new Employee(19L, "first", "last", Role.MANAGER, LocalDate.now().minusDays(18));
+    Employee m20 = new Employee(20L, "first", "last", Role.MANAGER, LocalDate.now().minusDays(19));
+    Employee m21 = new Employee(21L, "first", "last", Role.MANAGER, LocalDate.now().minusDays(20));
+    Employee m22 = new Employee(22L, "first", "last", Role.MANAGER, LocalDate.now().minusDays(21));
+    Employee m23 = new Employee(23L, "first", "last", Role.MANAGER, LocalDate.now().minusDays(22));
+
+    orgManager = new OrganisationManager(e1);
+    orgManager.addEmployee(m2, 1)
+        .addEmployee(m3, 1)
+        .addEmployee(m4, 3)
+        .addEmployee(m5, 3)
+        .addEmployee(m6, 5)
+        .addEmployee(m7, 5)
+        .addEmployee(m8, 7)
+        .addEmployee(m9, 7)
+        .addEmployee(m10, 9)
+        .addEmployee(m11, 9)
+        .addEmployee(m12, 11)
+        .addEmployee(m13, 11)
+        .addEmployee(m14, 13)
+        .addEmployee(m15, 13)
+        .addEmployee(m16, 15)
+        .addEmployee(m17, 15)
+        .addEmployee(m18, 17)
+        .addEmployee(m19, 17)
+        .addEmployee(m20, 19)
+        .addEmployee(m21, 19)
+        .addEmployee(m22, 21)
+        .addEmployee(m23, 21);
+
+    assertEquals("m3 is a candidate to be promoted to director", m3,
+        orgManager.promotionWaitingList(Role.DIRECTOR).iterator().next());
+    assertEquals("only 1 qualified candidate", 1,
+        orgManager.promotionWaitingList(Role.DIRECTOR).size());
   }
 }

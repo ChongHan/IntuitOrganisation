@@ -3,7 +3,7 @@ package com.chong.han.techtest.models.implementations;
 import java.time.LocalDate;
 
 /**
- * Created by CHONG HAN on 14/04/2017.
+ * Created by Chong Han on 14/04/2017.
  */
 public class EmployeeFactory {
 

@@ -20,6 +20,8 @@ public class EmployeeTest {
 
     ceo.addDirectReport(director);
     assertEquals("ceo has 1 reports", 1, ceo.getReports().size());
+    assertEquals("ceo has director as a direct report", director,
+        ceo.getReports().iterator().next());
   }
 
   @Test
@@ -64,6 +66,7 @@ public class EmployeeTest {
 
     assertEquals("employee with employeeNumber 1 found", 1,
         ceo.findEmployee(1).getEmployeeNumber());
+    assertEquals("employee is ceo's subordinate", employee, ceo.findEmployee(1));
   }
 
   @Test

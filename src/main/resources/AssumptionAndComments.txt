@@ -1,0 +1,22 @@
+- Organisation needs one CEO upon creation
+- Direct reports of CEO/Director/Manager/Vice President can be of any role (excluding CEO)
+- CEO doesn't change teams nor step down
+
+- Employee class provides basic getter and setter for the necessary properties.
+
+- OrganisationManager class handles adding an employee to the organisation
+
+- When one change team, it's most senior takes over it's role, recursively.
+
+- Holiday feature is achieved by adding a isOnHoliday flag in Employee,
+  OrganisationManager handles the logic when a manager goes on holiday
+  eg. holidayEmployee's directReports now reports to holidayEmployee's manager
+      holidayEmployee's manager has them as directReport temporarily until the
+      flag is flipped back.
+
+- Promotion is one of the situations of changeTeam, just changTeam to the manager of
+  promotedEmployee's manager.
+
+- Vice President and Director promotion feature is implemented according to the requirement.
+
+

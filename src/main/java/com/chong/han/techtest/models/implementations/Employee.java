@@ -13,14 +13,12 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class Employee implements Personnel {
 
-  static final Comparator<Employee> StartDateComparator = new Comparator<Employee>() {
-    @Override
-    public int compare(Employee employee1, Employee employee2) {
-      LocalDate date1 = employee1.startDate;
-      LocalDate date2 = employee2.startDate;
-      return date1.compareTo(date2);
-    }
+  public static final Comparator<Employee> START_DATE_COMPARATOR = (employee1, employee2) -> {
+    LocalDate date1 = employee1.startDate;
+    LocalDate date2 = employee2.startDate;
+    return date1.compareTo(date2);
   };
+
   private final long employeeNumber;
   private final LocalDate startDate;
   private String firstname;
@@ -29,7 +27,6 @@ public class Employee implements Personnel {
   private boolean holiday = false;
   private Collection<Employee> reports = new CopyOnWriteArrayList<Employee>();
   private Employee superior;
-
 
   public Employee(long employeeNumber, String firstname, String lastname, Role role,
       LocalDate startDate) {
@@ -82,20 +79,20 @@ public class Employee implements Personnel {
 
   public Employee getSuperior() {
     if (this.role == Role.CEO) {
-      throw new InvalidOperationException();
+      throw new InvalidOperationException("CEO has no manager");
     }
     return superior;
   }
 
   public void setSuperior(Employee superior) {
     if (this.role == Role.CEO) {
-      throw new InvalidOperationException();
+      throw new InvalidOperationException("CEO has no manager");
     }
     this.superior = superior;
   }
 
   public Employee getSeniorReport() {
-    Collections.sort((CopyOnWriteArrayList) this.reports, StartDateComparator);
+    Collections.sort((CopyOnWriteArrayList) this.reports, START_DATE_COMPARATOR);
 
     return getReports().iterator().next();
   }
@@ -111,7 +108,8 @@ public class Employee implements Personnel {
 
     Employee employee = (Employee) o;
 
-    return employeeNumber == employee.employeeNumber;
+    return employeeNumber
+        == employee.employeeNumber;
   }
 
   @Override
@@ -178,5 +176,23 @@ public class Employee implements Personnel {
       }
     }
     return sb.toString();
+  }
+
+  public void print() {
+    print("", true);
+  }
+
+  private void print(String prefix, boolean isTail) {
+    System.out.println(
+        prefix + (isTail ? "└── " : "├── ") + getEmployeeNumber() + " " + getRole().toString()
+            .substring(0, 1));
+
+    for (int i = 0; i < getReports().size() - 1; i++) {
+      ((Employee) (getReports().toArray()[i])).print(prefix + (isTail ? "    " : "│   "), false);
+    }
+    if (getReports().size() > 0) {
+      ((Employee) (getReports().toArray()[getReports().size() - 1]))
+          .print(prefix + (isTail ? "    " : "│   "), true);
+    }
   }
 }
