@@ -161,4 +161,59 @@ public class OrganisationManager implements Organisation {
   public String vicePresidentDirectorPromotionWaitingListToString() {
     return null;
   }
+
+  public int countAllSub(long employeeNumber) {
+    Employee employee = ceo.findEmployee(employeeNumber);
+
+    if (employee == null || employee.getReports().size() == 0) {
+      throw new InvalidOperationException();
+    }
+
+    return countSub(employee) - 1; // remove self count
+  }
+
+  private int countSub(Employee employee) {
+    if (employee.getReports().size() == 0) {
+      return 1;
+    } else {
+      int count = 0;
+      for (Employee report : employee.getReports()) {
+        count += countSub(report);
+      }
+      return count + 1;
+    }
+  }
+
+  public int countAllSubRole(long employeeNumber, Role role) {
+    Employee employee = ceo.findEmployee(employeeNumber);
+
+    if (employee == null) {
+      throw new InvalidOperationException();
+    }
+
+    int count = 0;
+    count = countSubRole(employee, role);
+    if (employee.getRole() == role && employee.getReports().size() > 0) { //remove count of self
+      count -= 1;
+    }
+    return count;
+  }
+
+  private int countSubRole(Employee employee, Role role) {
+    if (employee.getReports().size() == 0) {
+      if (employee.getRole() == role && role != Role.MANAGER) { // only count manager with subs
+        return 1;
+      } else return 0;
+    }
+    else {
+      int count = 0;
+      for (Employee report : employee.getReports()) {
+        count += countSubRole(report, role);
+      }
+      if (employee.getRole() == role) {
+        count += 1;
+      }
+      return count;
+    }
+  }
 }

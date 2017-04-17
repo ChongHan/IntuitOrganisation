@@ -18,6 +18,7 @@ public class EmployeeTest {
     Employee ceo = new Employee(0L, "first", "last", Role.CEO, LocalDate.now());
     Employee director = new Employee(1L, "first", "last", Role.DIRECTOR, LocalDate.now());
 
+    ceo.addDirectReport(director);
     assertEquals("ceo has 1 reports", 1, ceo.getReports().size());
   }
 
@@ -61,7 +62,8 @@ public class EmployeeTest {
     ceo.addDirectReport(manager2);
     manager.addDirectReport(employee);
 
-    assertEquals("employee with employeeNumber 1 found", 1, ceo.findEmployee(1).getEmployeeNumber());
+    assertEquals("employee with employeeNumber 1 found", 1,
+        ceo.findEmployee(1).getEmployeeNumber());
   }
 
   @Test
@@ -96,7 +98,7 @@ public class EmployeeTest {
     ceo.addDirectReport(employee);
     ceo.addDirectReport(director);
 
-    assertEquals("2 direct reports in ceo", 2, ceo.getReports().size());
+    assertEquals("2 direct reports in ceo", 3, ceo.getReports().size());
   }
 }
 

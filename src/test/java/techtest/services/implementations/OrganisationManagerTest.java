@@ -215,8 +215,48 @@ public class OrganisationManagerTest {
 
     assertEquals(3, e1.getReports().size());
     assertEquals(2, m3.getReports().size());
-    assertEquals("e1 has reports 2, 3, 5", e1.getReports(), new CopyOnWriteArrayList<Employee>(Arrays.asList(m2, m3, m5)));
+    assertEquals("e1 has reports 2, 3, 5", e1.getReports(),
+        new CopyOnWriteArrayList<Employee>(Arrays.asList(m2, m3, m5)));
     assertEquals("m5 and m2 report to the same manager", m5.getSuperior(), m2.getSuperior());
-    assertEquals("m3 has reports 4, 7", m3.getReports(), new CopyOnWriteArrayList<Employee>(Arrays.asList(m4, m7)));
+    assertEquals("m3 has reports 4, 7", m3.getReports(),
+        new CopyOnWriteArrayList<Employee>(Arrays.asList(m4, m7)));
+  }
+
+  @Test
+  /**
+   * structure: e1 - e2
+   *               - e3 - e4
+   *                     - e5 - e6
+   *                          - e7 - e8
+   *                               - e9 - e10
+   */
+  public void canCountNumberOfDirectAndIndirectSubs() {
+    Employee e1 = new Employee(1L, "first", "last", Role.CEO, LocalDate.now());
+    Employee m2 = new Employee(2L, "first", "last", Role.MANAGER, LocalDate.now().minusDays(1));
+    Employee m3 = new Employee(3L, "first", "last", Role.MANAGER, LocalDate.now().minusDays(2));
+    Employee m4 = new Employee(4L, "first", "last", Role.MANAGER, LocalDate.now().minusDays(3));
+    Employee m5 = new Employee(5L, "first", "last", Role.MANAGER, LocalDate.now().minusDays(4));
+    Employee m6 = new Employee(6L, "first", "last", Role.MANAGER, LocalDate.now().minusDays(5));
+    Employee m7 = new Employee(7L, "first", "last", Role.MANAGER, LocalDate.now().minusDays(6));
+    Employee m8 = new Employee(8L, "first", "last", Role.MANAGER, LocalDate.now().minusDays(7));
+    Employee m9 = new Employee(9L, "first", "last", Role.MANAGER, LocalDate.now().minusDays(8));
+    Employee m10 = new Employee(10L, "first", "last", Role.MANAGER, LocalDate.now().minusDays(9));
+
+    orgManager = new OrganisationManager(e1);
+    orgManager.addEmployee(m2, 1);
+    orgManager.addEmployee(m3, 1);
+    orgManager.addEmployee(m4, 3);
+    orgManager.addEmployee(m5, 3);
+    orgManager.addEmployee(m6, 5);
+    orgManager.addEmployee(m7, 5);
+    orgManager.addEmployee(m8, 7);
+    orgManager.addEmployee(m9, 7);
+    orgManager.addEmployee(m10, 9);
+
+    assertEquals("e1 has 9 subs", 9, orgManager.countAllSub(e1.getEmployeeNumber()));
+    assertEquals("m9 has 1 sub", 1, orgManager.countAllSub(m9.getEmployeeNumber()));
+    assertEquals("m7 has 3 subs", 3, orgManager.countAllSub(m7.getEmployeeNumber()));
+
+    System.out.println(orgManager.countAllSubRole(2, Role.MANAGER));
   }
 }

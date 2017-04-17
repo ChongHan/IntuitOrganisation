@@ -3,24 +3,33 @@ package com.chong.han.techtest.models.implementations;
 import com.chong.han.techtest.exceptions.InvalidOperationException;
 import com.chong.han.techtest.models.interfaces.Personnel;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Created by CHONG HAN on 14/04/2017.
  */
 public class Employee implements Personnel {
 
+  static final Comparator<Employee> StartDateComparator = new Comparator<Employee>() {
+    @Override
+    public int compare(Employee employee1, Employee employee2) {
+      LocalDate date1 = employee1.startDate;
+      LocalDate date2 = employee2.startDate;
+      return date1.compareTo(date2);
+    }
+  };
   private final long employeeNumber;
   private final LocalDate startDate;
   private String firstname;
   private String lastname;
   private Role role;
-
-  private Collection<Employee> reports = new ArrayList<Employee>();
+  private boolean holiday = false;
+  private Collection<Employee> reports = new CopyOnWriteArrayList<Employee>();
   private Employee superior;
+
 
   public Employee(long employeeNumber, String firstname, String lastname, Role role,
       LocalDate startDate) {
@@ -30,7 +39,6 @@ public class Employee implements Personnel {
     this.startDate = startDate;
     this.employeeNumber = employeeNumber;
   }
-
 
   public long getEmployeeNumber() {
     return employeeNumber;
@@ -86,11 +94,29 @@ public class Employee implements Personnel {
     this.superior = superior;
   }
 
-
   public Employee getSeniorReport() {
-    Collections.sort((ArrayList) this.reports, StartDateComparator);
+    Collections.sort((CopyOnWriteArrayList) this.reports, StartDateComparator);
 
     return getReports().iterator().next();
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+
+    Employee employee = (Employee) o;
+
+    return employeeNumber == employee.employeeNumber;
+  }
+
+  @Override
+  public int hashCode() {
+    return (int) (employeeNumber ^ (employeeNumber >>> 32));
   }
 
   public Employee findEmployee(long employeeNumber) {
@@ -107,6 +133,14 @@ public class Employee implements Personnel {
     return null;
   }
 
+  public boolean isHoliday() {
+    return holiday;
+  }
+
+  public void setHoliday(boolean holiday) {
+    this.holiday = holiday;
+  }
+
   @Override
   public Employee addDirectReport(Personnel directReport) {
     reports.add((Employee) directReport);
@@ -118,7 +152,6 @@ public class Employee implements Personnel {
     if (reports.removeIf(e -> e.getEmployeeNumber() == employeeNumber)) {
       return this;
     }
-
     throw new InvalidOperationException();
   }
 
@@ -129,15 +162,6 @@ public class Employee implements Personnel {
     }
     return this.getSuperior().getLevel() + 1;
   }
-
-  static final Comparator<Employee> StartDateComparator = new Comparator<Employee>() {
-    @Override
-    public int compare(Employee employee1, Employee employee2) {
-      LocalDate date1 = employee1.startDate;
-      LocalDate date2 = employee2.startDate;
-      return date1.compareTo(date2);
-    }
-  };
 
   @Override
   public String toString() {
